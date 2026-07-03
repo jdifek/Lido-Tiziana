@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta id="meta-desc" name="description" content="Lido Tiziana — ristorante, pizzeria e stabilimento balneare a Specchiolla (BR). Prenota il tuo tavolo fronte mare.">
+<title id="page-title">Lido Tiziana | Ristorante &amp; Pizzeria Specchiolla</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* =====================================================================
+   TEMPLATE RISTORANTE — 1 FILE, FACILE DA RIMARCHIARE
+   (commenti in russo per te, il contenuto visibile è in italiano)
+
+   ЧТО МЕНЯТЬ ПРИ СМЕНЕ БРЕНДА:
+   1) Весь блок CONFIG в самом начале <script> внизу файла —
+      название, цвета, телефон, адрес, часы работы, меню, фото.
+   2) Больше почти НИЧЕГО в HTML/CSS трогать не нужно — всё
+      (шапка, футер, часы, контакты, меню) рендерится из CONFIG.
+   ===================================================================== */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --or:#e8631c;--ord:#c94f10;
+  --bk:#0d2231;--wh:#fff;
+  --gl:#f3f1ee;--gm:#e7e3de;
+  --gt:rgba(16,16,16,0.68);
+  --rc:16px;--pill:100px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:#fff;color:#111;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:'Playfair Display',serif;line-height:1.2}
+img{display:block;max-width:100%}
+button{font-family:'DM Sans',sans-serif;cursor:pointer}
+a{text-decoration:none;cursor:pointer;color:inherit}
+
+/* TOAST */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:#111;color:#fff;padding:12px 22px;border-radius:50px;font-size:14px;z-index:9999;opacity:0;transition:all .4s cubic-bezier(.34,1.56,.64,1);pointer-events:none;white-space:nowrap;display:flex;align-items:center;gap:8px;max-width:90vw}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.t-dot{width:8px;height:8px;border-radius:50%;background:#4ade80;flex-shrink:0}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:200;background:rgba(255,255,255,0.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:0.5px solid rgba(0,0,0,0.09);height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;gap:12px}
+.logo-link{display:flex;align-items:center;flex-shrink:0}
+.logo-text{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#111;white-space:nowrap}
+.logo-text em{color:var(--or);font-style:italic}
+.nav-links{display:none;gap:20px;align-items:center}
+.nav-links a{font-size:14px;color:#111;opacity:.65;transition:opacity .2s;white-space:nowrap}
+.nav-links a:hover,.nav-links a.active{opacity:1}
+.nav-right{display:flex;align-items:center;gap:10px}
+.hamburger{display:flex;flex-direction:column;gap:5px;padding:6px;background:none;border:none;cursor:pointer}
+.hamburger span{display:block;width:22px;height:2px;background:#111;border-radius:2px;transition:all .3s}
+.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.nav-cta{display:flex;align-items:center;gap:8px;background:var(--or);color:#fff;border:none;border-radius:var(--pill);padding:7px 7px 7px 14px;font-size:13px;font-weight:500;white-space:nowrap;transition:background .2s}
+.nav-cta:hover{background:var(--ord)}
+.nav-cta .ic{width:30px;height:30px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cta-label{display:none}
+.mobile-menu{display:none;position:fixed;top:60px;left:0;right:0;background:#fff;border-bottom:0.5px solid rgba(0,0,0,.1);z-index:199;padding:8px 0 12px;box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.mobile-menu.open{display:block}
+.mobile-menu a{display:block;padding:13px 20px;font-size:15px;color:#111;transition:background .15s}
+.mobile-menu a:hover{background:var(--gl)}
+
+/* PAGES */
+.page{display:none}.page.active{display:block}
+
+/* SECTIONS */
+.sect{padding:48px 16px}
+.sect-dark{padding:48px 16px;background:var(--bk)}
+.sect-gray{padding:48px 16px;background:var(--gl)}
+
+/* LABEL */
+.sl{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.sl .dot{width:22px;height:22px;border-radius:50%;background:var(--or);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sl .dot svg{width:9px;height:9px}
+.sl .lt{font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#111}
+.sl.light .lt{color:rgba(255,255,255,.65)}
+.sl.light .dot{background:rgba(255,255,255,.15)}
+
+/* BUTTONS */
+.btn-p{display:inline-flex;align-items:center;justify-content:space-between;background:var(--or);color:#fff;border:none;border-radius:var(--pill);padding:6px 6px 6px 16px;font-size:14px;font-weight:500;gap:8px;transition:background .2s;cursor:pointer}
+.btn-p:hover{background:var(--ord)}
+.btn-p .ic{width:36px;height:36px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.btn-s{display:inline-flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.14);color:#fff;border:0.5px solid rgba(255,255,255,.4);border-radius:var(--pill);padding:6px 6px 6px 16px;font-size:14px;font-weight:500;gap:8px;transition:all .2s;cursor:pointer}
+.btn-s .ic{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* HERO */
+.hero{position:relative;height:520px;overflow:hidden;background:#111}
+.hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.65;transition:background-image .4s}
+.hero-content{position:relative;z-index:2;padding:24px 16px 80px;display:flex;flex-direction:column;justify-content:flex-end;height:100%}
+.hero-tag{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.12);border:0.5px solid rgba(255,255,255,.3);border-radius:var(--pill);padding:5px 12px;margin-bottom:14px;color:#fff;font-size:12px;width:fit-content}
+.hero-tag span{width:6px;height:6px;border-radius:50%;background:var(--or);flex-shrink:0}
+.hero h1{font-size:28px;font-weight:700;color:#fff;line-height:1.15;margin-bottom:12px}
+.hero h1 em{color:var(--or);font-style:italic}
+.hero-sub{color:rgba(255,255,255,.8);font-size:14px;font-weight:300;margin-bottom:22px;line-height:1.6;max-width:480px}
+.hero-btns{display:flex;gap:10px;flex-wrap:wrap}
+.hero-controls{position:absolute;bottom:20px;right:16px;z-index:3;display:flex;align-items:center;gap:14px}
+.pb{width:100px;height:3px;background:rgba(255,255,255,.25);border-radius:4px;overflow:hidden}
+.pf{height:100%;background:#fff;border-radius:4px;transition:width .3s}
+.cb{display:flex;gap:8px}
+.cbn{width:38px;height:38px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s}
+.cbn.prev{background:var(--or)}.cbn.prev:hover{background:var(--ord)}
+.cbn.next{background:var(--gm)}.cbn.next:hover{background:#fff}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat-card{background:#fff;border-radius:var(--rc);padding:18px 14px;text-align:center;border:0.5px solid rgba(0,0,0,.07)}
+.stat-num{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--or)}
+.stat-label{font-size:12px;color:var(--gt);margin-top:3px;line-height:1.3}
+
+/* ABOUT */
+.about-img{width:100%;height:240px;object-fit:cover;border-radius:var(--rc)}
+.about-badge{display:inline-flex;align-items:center;gap:10px;background:#fff;border-radius:12px;padding:12px 16px;margin-top:-32px;position:relative;z-index:1;box-shadow:0 4px 16px rgba(0,0,0,.1)}
+.badge-num{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--or);line-height:1}
+.pill-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.pill-tag{border-radius:var(--pill);border:0.5px solid rgba(0,0,0,.15);padding:7px 13px;font-size:12px;background:#fff}
+
+/* DISHES */
+.dishes-grid{display:grid;grid-template-columns:1fr;gap:14px}
+.dish-card{background:var(--gl);border-radius:var(--rc);overflow:hidden}
+.dish-card img{width:100%;height:180px;object-fit:cover}
+.dish-body{padding:14px}
+.dish-cat{display:inline-block;background:var(--or);color:#fff;border-radius:var(--pill);padding:3px 11px;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px}
+.dish-name{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;margin-bottom:5px}
+.dish-desc{font-size:13px;color:var(--gt);line-height:1.5;margin-bottom:10px}
+.dish-foot{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.dish-price{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--or)}
+
+/* USP */
+.usp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:28px}
+.usp-card{background:#fff;border-radius:var(--rc);padding:18px 16px}
+.usp-icon{margin-bottom:12px}
+.usp-card h4{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;margin-bottom:6px}
+.usp-card p{font-size:12px;color:var(--gt);line-height:1.55}
+
+/* QUOTE */
+.quote-block{background:var(--or);border-radius:var(--rc);padding:28px 20px;margin:0 16px;position:relative;overflow:hidden}
+.quote-mark{position:absolute;top:-10px;left:10px;font-family:'Playfair Display',serif;font-size:80px;color:rgba(255,255,255,.15);line-height:1;pointer-events:none}
+.quote-text{font-family:'Playfair Display',serif;font-size:16px;font-style:italic;color:#fff;line-height:1.55;position:relative;z-index:1}
+.quote-author{font-size:13px;color:rgba(255,255,255,.75);margin-top:12px;position:relative;z-index:1}
+
+/* REVIEWS */
+.reviews-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:24px}
+.review-card{background:#fff;border-radius:var(--rc);padding:18px 16px;border:0.5px solid rgba(0,0,0,.06)}
+.stars{color:var(--or);font-size:14px;margin-bottom:10px}
+.rv-txt{font-size:13px;color:#333;line-height:1.65;margin-bottom:14px;font-style:italic}
+.rv-auth{display:flex;align-items:center;gap:10px}
+.av{width:38px;height:38px;border-radius:50%;background:var(--or);display:flex;align-items:center;justify-content:center;font-weight:500;color:#fff;font-size:13px;flex-shrink:0}
+.av-name{font-weight:500;font-size:13px}
+.av-loc{font-size:11px;color:#888}
+
+/* LOCATION */
+.map-card{border-radius:var(--rc);overflow:hidden;position:relative;height:200px;background:var(--gm);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:#888;margin-bottom:12px;cursor:pointer;transition:opacity .2s}
+.map-card:hover{opacity:.85}
+.addr-card{background:#fff;border-radius:var(--rc);padding:16px;border:0.5px solid rgba(0,0,0,.06)}
+.addr-card p{font-size:14px;color:#444;line-height:1.9}
+.hours-table{width:100%}
+.hr-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid rgba(0,0,0,.08);font-size:13px}
+.hr-row:last-child{border-bottom:none}
+.hr-row.today .hr-day, .hr-row.today .hr-time{color:var(--or);font-weight:600}
+.hr-day{color:#555}
+.hr-time{font-weight:500}
+.hr-row.light{border-bottom:0.5px solid rgba(255,255,255,.1)}
+.hr-row.light .hr-day{color:rgba(255,255,255,.55)}
+.hr-row.light .hr-time{color:#fff}
+.hr-row.light.today .hr-day,.hr-row.light.today .hr-time{color:var(--or)}
+
+/* MENU */
+.mt-wrap{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0}
+.mtab{border-radius:var(--pill);border:0.5px solid rgba(255,255,255,.22);padding:8px 16px;font-size:13px;color:rgba(255,255,255,.6);background:transparent;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+.mtab.active{background:var(--or);color:#fff;border-color:var(--or)}
+.mi-grid{display:grid;grid-template-columns:1fr;gap:1px;background:rgba(255,255,255,.06);border-radius:14px;overflow:hidden}
+.mi{background:rgba(255,255,255,.04);padding:16px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;transition:background .2s}
+.mi:hover{background:rgba(255,255,255,.08)}
+.mi h4{font-family:'Playfair Display',serif;font-size:15px;font-weight:500;color:#fff;margin-bottom:3px}
+.mi p{font-size:12px;color:rgba(255,255,255,.5);line-height:1.5}
+.mi-price{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--or);white-space:nowrap}
+.menu-note{background:rgba(255,255,255,.06);border-radius:12px;padding:14px 16px;margin-bottom:8px}
+.menu-note p{color:rgba(255,255,255,.55);font-size:12px;line-height:1.65}
+
+/* BOOKING */
+.book-bg{background:var(--bk);padding:48px 16px;position:relative;overflow:hidden}
+.book-bg-txt{position:absolute;top:-10px;right:-10px;font-family:'Playfair Display',serif;font-size:90px;font-weight:700;color:rgba(255,255,255,.03);line-height:1;pointer-events:none}
+.book-form{background:#fff;border-radius:var(--rc);padding:22px 16px}
+.form-row{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:10px}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg label{font-size:11px;font-weight:500;color:#555;text-transform:uppercase;letter-spacing:.07em}
+.fg input,.fg select,.fg textarea{border:0.5px solid rgba(0,0,0,.15);border-radius:10px;padding:10px 13px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;background:var(--gl);transition:border-color .2s;-webkit-appearance:none;width:100%;resize:none}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--or);background:#fff}
+.fs{display:flex;align-items:center;justify-content:space-between;background:var(--or);color:#fff;border:none;border-radius:var(--pill);padding:8px 8px 8px 18px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:background .2s;width:100%;margin-top:14px}
+.fs:hover{background:var(--ord)}
+.fs .ic{width:36px;height:36px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.wa-btn{display:flex;align-items:center;gap:10px;border:0.5px solid rgba(255,255,255,.2);color:#fff;background:rgba(255,255,255,.07);border-radius:var(--pill);padding:10px 18px;font-size:14px;cursor:pointer;transition:all .2s;margin-top:12px;width:100%;justify-content:center}
+.wa-btn:hover{background:rgba(255,255,255,.13)}
+.cancel-note{margin-top:16px;background:rgba(255,255,255,.06);border-radius:12px;padding:14px 16px}
+.cancel-note p{color:rgba(255,255,255,.5);font-size:12px;line-height:1.65}
+
+/* CONTACT / FAQ */
+.faq-item{border-bottom:0.5px solid rgba(0,0,0,.08);padding:13px 0;cursor:pointer}
+.faq-q{display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:500;color:#111;gap:8px}
+.faq-a{display:none;font-size:13px;color:#666;line-height:1.65;margin-top:8px}
+
+/* FOOTER */
+footer{background:#08161f;padding:40px 16px 24px}
+.footer-logo{margin-bottom:12px;display:block}
+.footer-brand p{color:rgba(255,255,255,.5);font-size:13px;line-height:1.7;margin-bottom:16px;max-width:320px}
+.soc-row{display:flex;gap:10px;margin-bottom:24px}
+.soc{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;transition:background .2s}
+.soc:hover{background:var(--or)}
+.soc svg{width:16px;height:16px;fill:#fff}
+.footer-cols{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}
+.fc h5{color:#fff;font-size:13px;font-weight:500;margin-bottom:14px;text-transform:uppercase;letter-spacing:.06em;opacity:.8}
+.fc a{display:block;color:rgba(255,255,255,.5);font-size:13px;margin-bottom:11px;transition:color .2s}
+.fc a:hover{color:#fff}
+.footer-bottom{border-top:0.5px solid rgba(255,255,255,.08);padding-top:18px;display:flex;flex-direction:column;gap:8px;color:rgba(255,255,255,.35);font-size:12px}
+.footer-bottom a{color:rgba(255,255,255,.35)}
+
+/* TABLET 640px+ */
+@media(min-width:640px){
+  .cta-label{display:inline}
+  .hamburger{display:none}
+  .nav-links{display:flex}
+  .mobile-menu{display:none !important}
+  .sect,.sect-dark,.sect-gray{padding:64px 24px}
+  .quote-block{margin:0 24px;padding:36px 36px}
+  .hero{height:580px}
+  .hero-content{padding:32px 24px 90px}
+  .hero h1{font-size:38px}
+  .hero-sub{font-size:15px}
+  .hero-controls{right:24px;bottom:24px}
+  .pb{width:150px}
+  .stats-grid{grid-template-columns:repeat(4,1fr)}
+  .about-img{height:320px}
+  .about-badge{margin-top:-40px}
+  .dishes-grid{grid-template-columns:1fr 1fr}
+  .usp-grid{grid-template-columns:repeat(2,1fr)}
+  .reviews-grid{grid-template-columns:1fr 1fr}
+  .mi-grid{grid-template-columns:1fr 1fr}
+  .form-row{grid-template-columns:1fr 1fr}
+  .footer-cols{grid-template-columns:repeat(2,1fr)}
+  .footer-bottom{flex-direction:row;justify-content:space-between}
+  .wa-btn{width:auto;justify-content:flex-start}
+}
+
+/* DESKTOP 1024px+ */
+@media(min-width:1024px){
+  nav{padding:0 40px;height:68px}
+  .sect,.sect-dark,.sect-gray{padding:80px 40px}
+  .quote-block{margin:0 40px;padding:48px 48px}
+  .hero{height:640px}
+  .hero-content{padding:80px 40px 64px}
+  .hero h1{font-size:52px}
+  .hero-sub{font-size:16px}
+  .hero-controls{right:40px;bottom:28px}
+  .pb{width:200px}
+  .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+  .about-img{height:440px}
+  .about-badge{position:absolute;bottom:24px;left:24px;margin-top:0}
+  .about-img-wrap{position:relative}
+  .stat-num{font-size:34px}
+  .dishes-grid{grid-template-columns:repeat(3,1fr)}
+  .dish-card img{height:200px}
+  .usp-grid{grid-template-columns:repeat(4,1fr)}
+  .reviews-grid{grid-template-columns:repeat(3,1fr)}
+  .location-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px}
+  .booking-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:start;max-width:1000px;margin:0 auto}
+  .footer-inner{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:40px;margin-bottom:32px}
+  .quote-mark{font-size:120px}
+  .quote-text{font-size:22px}
+}
+.footer-inner{max-width:1200px;margin:0 auto 24px}
+.footer-bottom-inner{max-width:1200px;margin:0 auto}
+.sect-inner,.sect-dark-inner,.sect-gray-inner{max-width:1200px;margin:0 auto}
+</style>
+</head>
+<body>
+
+<div id="toast"><span class="t-dot"></span><span id="toast-msg">Inviato!</span></div>
+
+<!-- NAV -->
+<nav>
+  <a class="logo-link" onclick="goPage('home')">
+    <span class="logo-text" id="nav-logo"></span>
+  </a>
+  <div class="nav-links">
+    <a onclick="goPage('home')">Home</a>
+    <a onclick="goPage('menu')">Menu</a>
+    <a onclick="goPage('booking')">Info &amp; Contatti</a>
+  </div>
+  <div class="nav-right">
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <a class="nav-cta" onclick="goPage('booking')">
+      <span class="cta-label">Prenota ora</span>
+      <span class="ic"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M17.5 7.5H6.25C4.179 7.5 2.5 9.179 2.5 11.25C2.5 13.321 4.179 15 6.25 15H10M17.5 7.5L14.167 4.167M17.5 7.5L14.167 10.833" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </a>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a onclick="goPage('home');toggleMenu()">Home</a>
+  <a onclick="goPage('menu');toggleMenu()">Menu</a>
+  <a onclick="goPage('booking');toggleMenu()">Info &amp; Contatti</a>
+</div>
+
+<!-- ===== HOME ===== -->
+<div id="sec-home" class="page active">
+
+  <section class="hero">
+    <div class="hero-bg" id="hero-bg"></div>
+    <div class="hero-content">
+      <div class="hero-tag" id="hero-tag"><span></span></div>
+      <h1 id="hero-title"></h1>
+      <p class="hero-sub" id="hero-sub"></p>
+      <div class="hero-btns">
+        <button class="btn-p" onclick="goPage('booking')">Prenota ora<span class="ic"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M17.5 7.5H6.25C4.179 7.5 2.5 9.179 2.5 11.25C2.5 13.321 4.179 15 6.25 15H10M17.5 7.5L14.167 4.167M17.5 7.5L14.167 10.833" stroke="#e8631c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+        <button class="btn-s" onclick="goPage('menu')">Vedi il menu<span class="ic"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M17.5 7.5H6.25C4.179 7.5 2.5 9.179 2.5 11.25C2.5 13.321 4.179 15 6.25 15H10M17.5 7.5L14.167 4.167M17.5 7.5L14.167 10.833" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+      </div>
+    </div>
+    <div class="hero-controls">
+      <div class="pb"><div class="pf" id="hp" style="width:33%"></div></div>
+      <div class="cb">
+        <button class="cbn prev" onclick="hSlide(-1)"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M2.5 7.5H13.75C15.821 7.5 17.5 9.179 17.5 11.25C17.5 13.321 15.821 15 13.75 15H10M2.5 7.5L5.833 4.167M2.5 7.5L5.833 10.833" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="cbn next" onclick="hSlide(1)"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M17.5 7.5H6.25C4.179 7.5 2.5 9.179 2.5 11.25C2.5 13.321 4.179 15 6.25 15H10M17.5 7.5L14.167 4.167M17.5 7.5L14.167 10.833" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="sect-gray">
+    <div class="sect-gray-inner">
+      <div class="stats-grid" id="stats-grid"></div>
+    </div>
+  </section>
+
+  <section class="sect-gray" style="padding-top:0">
+    <div class="sect-gray-inner">
+      <div class="about-grid">
+        <div class="about-img-wrap">
+          <img class="about-img" src="https://images.unsplash.com/photo-1533587851505-d119e13fa0d7?w=900&auto=format&fit=crop" alt="Vista sul mare di Specchiolla">
+          <div class="about-badge">
+            <div class="badge-num" id="about-rating"></div>
+            <div style="font-size:12px;color:#555;line-height:1.4">su Google<br><span id="about-reviews"></span></div>
+          </div>
+        </div>
+        <div style="margin-top:20px">
+          <div class="sl"><div class="dot"><svg viewBox="0 0 9 9" fill="none"><path d="M4.167.695V7.639M6.622 1.712L1.712 6.622M7.639 4.167H.695M6.622 6.622L1.712 1.712" stroke="#0C0C0C" stroke-width="0.833" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="lt">Chi Siamo</span></div>
+          <h2 style="font-size:26px;margin-bottom:14px">Mare, pizza e cucina <em style="color:var(--or);font-style:italic">pugliese</em></h2>
+          <p style="font-size:14px;color:var(--gt);line-height:1.7;margin-bottom:12px">A Specchiolla, sulla costa tra Carovigno e Torre Guaceto, il Lido Tiziana è ristorante, pizzeria e stabilimento balneare in un unico luogo: ombrelloni a due passi dal tavolo e il mare come sfondo a ogni pasto.</p>
+          <p style="font-size:14px;color:var(--gt);line-height:1.7;margin-bottom:18px">Pizza cotta al forno con impasto a lievitazione lenta, pesce fresco e piatti della tradizione pugliese, serviti dalla colazione fino a mezzanotte.</p>
+          <div class="pill-row">
+            <span class="pill-tag">Fronte mare</span>
+            <span class="pill-tag">Pizzeria</span>
+            <span class="pill-tag">Pesce fresco</span>
+            <span class="pill-tag">Aperto tutto il giorno</span>
+          </div>
+          <button class="btn-p" onclick="goPage('booking')">Come raggiungerci<span class="ic"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M17.5 7.5H6.25C4.179 7.5 2.5 9.179 2.5 11.25C2.5 13.321 4.179 15 6.25 15H10M17.5 7.5L14.167 4.167M17.5 7.5L14.167 10.833" stroke="#e8631c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sect">
+    <div class="sect-inner">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:14px">
+        <div><div class="sl"><div class="dot"><svg viewBox="0 0 9 9" fill="none"><path d="M4.167.695V7.639M6.622 1.712L1.712 6.622M7.639 4.167H.695M6.622 6.622L1.712 1.712" stroke="#0C0C0C" stroke-width="0.833" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="lt">Le Nostre Pizze</span></div><h2 style="font-size:26px;margin-top:6px">Qualche <em style="color:var(--or);font-style:italic">assaggio</em></h2></div>
+        <button class="btn-p" onclick="goPage('menu')" style="min-width:160px">Menu completo<span class="ic"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M17.5 7.5H6.25C4.179 7.5 2.5 9.179 2.5 11.25C2.5 13.321 4.179 15 6.25 15H10M17.5 7.5L14.167 4.167M17.5 7.5L14.167 10.833" stroke="#e8631c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+      </div>
+      <div class="dishes-grid" id="featured-grid"></div>
+    </div>
+  </section>
+
+  <section class="sect-gray">
+    <div class="sect-gray-inner">
+      <div class="sl"><div class="dot"><svg viewBox="0 0 9 9" fill="none"><path d="M4.167.695V7.639M6.622 1.712L1.712 6.622M7.639 4.167H.695M6.622 6.622L1.712 1.712" stroke="#0C0C0C" stroke-width="0.833" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="lt">Perché Sceglierci</span></div>
+      <h2 style="font-size:26px;margin-top:6px">Quattro motivi per <em style="color:var(--or);font-style:italic">venirci a trovare</em></h2>
+      <div class="usp-grid">
+        <div class="usp-card"><div class="usp-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e8631c" stroke-width="1.5"><path d="M2 18c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2 2-2 4-2M2 12c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2 2-2 4-2"/></svg></div><h4>Fronte mare</h4><p>Tavoli a due passi dagli ombrelloni, sul lungomare di Specchiolla.</p></div>
+        <div class="usp-card"><div class="usp-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e8631c" stroke-width="1.5"><path d="M12 2C8 6 4 10 4 14a8 8 0 0016 0c0-4-4-8-8-12z"/></svg></div><h4>Forno a legna</h4><p>Impasto a lievitazione lenta, farina di prima qualità.</p></div>
+        <div class="usp-card"><div class="usp-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e8631c" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></div><h4>Aperto tutti i giorni</h4><p id="usp-hours">Dalla mattina fino a tarda notte, tutti i giorni della settimana.</p></div>
+        <div class="usp-card"><div class="usp-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e8631c" stroke-width="1.5"><path d="M8 3v2M16 3v2M3 9h18M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"/></svg></div><h4>Per ogni occasione</h4><p>Pranzo in spiaggia, cena romantica o serata in compagnia.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="quote-block" style="margin-top:32px;margin-bottom:32px">
+    <div class="quote-mark">"</div>
+    <div class="quote-text">"Pesce freschissimo e pizza cotta a dovere, con vista sul mare di Specchiolla: la combinazione perfetta per una serata d'estate."</div>
+    <div class="quote-author">— Recensione di un cliente</div>
+  </div>
+
+  <section class="sect">
+    <div class="sect-inner">
+      <div class="sl"><div class="dot"><svg viewBox="0 0 9 9" fill="none"><path d="M4.167.695V7.639M6.622 1.712L1.712 6.622M7.639 4.167H.695M6.622 6.622L1.712 1.712" stroke="#0C0C0C" stroke-width="0.833" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="lt">Recensioni</span></div>
+      <h2 style="font-size:26px;margin-top:6px">Cosa dicono di <em style="color:var(--or);font-style:italic">noi</em></h2>
+      <div class="reviews-grid">
+        <div class="review-card"><div class="stars">★★★★★</div><p class="rv-txt">"Pizza ottima e servizio veloce nonostante il locale fosse pieno. Location bellissima davanti al mare."</p><div class="rv-auth"><div class="av">M</div><div><div class="av-name">Marco</div><div class="av-loc">Cliente Google</div></div></div></div>
+        <div class="review-card"><div class="stars">★★★★☆</div><p class="rv-txt">"Bella atmosfera, pesce fresco e personale gentile. Da provare la pizza Tiziana."</p><div class="rv-auth"><div class="av">G</div><div><div class="av-name">Giulia</div><div class="av-loc">Cliente Google</div></div></div></div>
+        <div class="review-card"><div class="stars">★★★★★</div><p class="rv-txt">"Comodissimo dopo una giornata in spiaggia: si mangia con i piedi quasi nella sabbia."</p><div class="rv-auth"><div class="av">L</div><div><div class="av-name">Luca</div><div class="av-loc">Cliente Google</div></div></div></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ===== MENU ===== -->
+<div id="sec-menu" class="page">
+  <section class="sect-dark" style="padding-bottom:12px">
+    <div class="sect-dark-inner">
+      <div class="sl light"><div class="dot"><svg viewBox="0 0 9 9" fill="none"><path d="M4.167.695V7.639M6.622 1.712L1.712 6.622M7.639 4.167H.695M6.622 6.622L1.712 1.712" stroke="white" stroke-width="0.833" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="lt">Il Nostro Menu</span></div>
+      <h2 style="font-size:28px;color:#fff;margin-top:8px">Le <em style="color:var(--or);font-style:italic">Pizze</em></h2>
+      <div class="mt-wrap" id="menu-tabs"></div>
+      <div class="menu-note" id="menu-note"></div>
+      <div id="menu-c"></div>
+    </div>
+  </section>
+  <section class="sect-gray">
+    <div class="sect-gray-inner" style="text-align:center">
+      <h3 style="font-size:20px;margin-bottom:10px">Vuoi un tavolo fronte mare?</h3>
+      <p style="font-size:13px;color:var(--gt);margin-bottom:18px">Prenota in pochi secondi, ti confermiamo subito la disponibilità.</p>
+      <button class="btn-p" onclick="goPage('booking')" style="margin:0 auto">Prenota ora<span class="ic"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M17.5 7.5H6.25C4.179 7.5 2.5 9.179 2.5 11.25C2.5 13.321 4.179 15 6.25 15H10M17.5 7.5L14.167 4.167M17.5 7.5L14.167 10.833" stroke="#e8631c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+    </div>
+  </section>
+</div>
+
+<!-- ===== BOOKING + INFO ===== -->
+<div id="sec-booking" class="page">
+  <section class="book-bg">
+    <div class="book-bg-txt">Prenota</div>
+    <div style="position:relative;z-index:2" class="sect-inner">
+      <div class="booking-grid">
+        <div>
+          <div class="sl light"><div class="dot"><svg viewBox="0 0 9 9" fill="none"><path d="M4.167.695V7.639M6.622 1.712L1.712 6.622M7.639 4.167H.695M6.622 6.622L1.712 1.712" stroke="white" stroke-width="0.833" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="lt">Prenotazioni</span></div>
+          <h2 style="font-size:30px;color:#fff;margin:10px 0 8px">Prenota il tuo <em style="color:var(--or);font-style:italic">tavolo</em></h2>
+          <p style="color:rgba(255,255,255,.6);font-size:14px;line-height:1.6;margin-bottom:24px">Consigliamo di prenotare in anticipo, specialmente nel weekend e in alta stagione.</p>
+          <div class="book-form">
+            <div class="form-row">
+              <div class="fg"><label>Nome e Cognome</label><input type="text" id="bk-name" placeholder="Mario Rossi"></div>
+              <div class="fg"><label>Telefono</label><input type="tel" id="bk-phone" placeholder="+39 333 123 4567"></div>
+            </div>
+            <div class="form-row">
+              <div class="fg"><label>Data</label><input type="date" id="bk-date"></div>
+              <div class="fg"><label>Ora</label><select id="bk-time"><option>12:30</option><option>13:00</option><option>13:30</option><option selected>20:00</option><option>20:30</option><option>21:00</option><option>21:30</option></select></div>
+            </div>
+            <div class="form-row">
+              <div class="fg"><label>Ospiti</label><select id="bk-guests"><option>1</option><option>2</option><option selected>3–4</option><option>5–6</option><option>7+</option></select></div>
+              <div class="fg"><label>Occasione</label><select id="bk-occasion"><option selected>Nessuna</option><option>Compleanno</option><option>Anniversario</option><option>Cena romantica</option></select></div>
+            </div>
+            <div class="fg"><label>Note</label><input type="text" id="bk-notes" placeholder="Allergie, richieste speciali..."></div>
+            <button class="fs" onclick="submitBooking()">Conferma prenotazione<span class="ic"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M17.5 7.5H6.25C4.179 7.5 2.5 9.179 2.5 11.25C2.5 13.321 4.179 15 6.25 15H10M17.5 7.5L14.167 4.167M17.5 7.5L14.167 10.833" stroke="#e8631c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+          </div>
+          <button class="wa-btn" id="wa-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="#25D366" stroke="none"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.559 4.117 1.533 5.842L.062 23.5l5.799-1.521A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.013-1.373l-.36-.213-3.443.903.92-3.352-.234-.374A9.818 9.818 0 012.182 12C2.182 6.577 6.577 2.182 12 2.182S21.818 6.577 21.818 12 17.423 21.818 12 21.818z"/></svg>Scrivi su WhatsApp</button>
+          <div class="cancel-note"><p><strong style="color:rgba(255,255,255,.75)">Nota:</strong> questo modulo è dimostrativo. Per una prenotazione reale contattaci telefonicamente o su WhatsApp.</p></div>
+        </div>
+
+        <div>
+          <div class="map-card" id="map-card">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5"><path d="M12 2C8.686 2 6 4.686 6 8c0 5.25 6 13 6 13s6-7.75 6-13c0-3.314-2.686-6-6-6z"/><circle cx="12" cy="8" r="2"/></svg>
+            <span style="font-size:13px;color:#777">Apri in Google Maps</span>
+          </div>
+          <div class="addr-card" id="addr-card" style="margin-bottom:12px"></div>
+          <div class="addr-card" id="hours-card"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a class="footer-logo logo-link" onclick="goPage('home')">
+        <span class="logo-text" id="footer-logo" style="color:#fff"></span>
+      </a>
+      <p id="footer-desc"></p>
+      <div class="soc-row" id="footer-soc"></div>
+    </div>
+    <div class="fc">
+      <h5>Pagine</h5>
+      <a onclick="goPage('home')">Home</a>
+      <a onclick="goPage('menu')">Il Menu</a>
+      <a onclick="goPage('booking')">Prenota &amp; Contatti</a>
+    </div>
+    <div class="fc">
+      <h5>Contatti</h5>
+      <a id="footer-phone" href="#"></a>
+      <a id="footer-email" href="#"></a>
+      <a id="footer-address" href="#" target="_blank"></a>
+      <a onclick="goPage('booking')" style="color:var(--or)">Prenota ora</a>
+    </div>
+  </div>
+  <div class="footer-bottom-inner">
+    <div class="footer-bottom">
+      <span id="footer-copy"></span>
+      <span>Sito dimostrativo</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* =====================================================================
+   1) КОНФИГУРАЦИЯ РЕСТОРАНА — ЕДИНСТВЕННОЕ МЕСТО, КОТОРОЕ НУЖНО МЕНЯТЬ,
+      ЧТОБЫ ПЕРЕДЕЛАТЬ ЭТОТ САЙТ ПОД ДРУГОЙ РЕСТОРАН/БРЕНД.
+      Меняешь текст ниже — весь сайт (шапка, футер, часы, контакты,
+      меню, отзывы, картинки) обновится автоматически.
+   ===================================================================== */
+const CONFIG = {
+  brand: {
+    name: "Lido Tiziana",
+    accent: "Tiziana",              // часть названия, которая красится в оранжевый и курсив
+    tagline: "Ristorante · Pizzeria · Fronte mare",
+    metaDescription: "Lido Tiziana — ristorante, pizzeria e stabilimento balneare a Specchiolla (BR). Prenota il tuo tavolo fronte mare.",
+    footerDesc: "Ristorante, pizzeria e stabilimento balneare a Specchiolla, sulla costa tra Carovigno e Torre Guaceto."
+  },
+  colors: {
+    primary: "#e8631c",
+    primaryDark: "#c94f10",
+    dark: "#0d2231"
+  },
+  contact: {
+    phoneDisplay: "368 751 7871",
+    phoneHref: "+390000000000".replace("0000000000","3687517871"),
+    whatsappNumber: "393687517871",
+    email: "info@lidotiziana.it",
+    addressLine: "Viale Tamerici, 6",
+    addressCity: "72012 Specchiolla, Carovigno (BR)",
+    mapsUrl: "https://maps.app.goo.gl/tYipVLJBnAtCyXfP7"
+  },
+  rating: { value: "3,7", count: "867 recensioni" },
+  priceRange: "10–40 € a persona",
+  hours: [
+    { day: "Lunedì",    time: "08:00 – 00:00" },
+    { day: "Martedì",   time: "08:00 – 00:00" },
+    { day: "Mercoledì", time: "08:00 – 00:00" },
+    { day: "Giovedì",   time: "08:00 – 00:00" },
+    { day: "Venerdì",   time: "08:00 – 00:00" },
+    { day: "Sabato",    time: "08:00 – 00:00" },
+    { day: "Domenica",  time: "08:00 – 00:00" }
+  ],
+  heroSlides: [
+    "https://images.unsplash.com/photo-1544148103-0773bf10d330?w=1400&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1400&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1595295333158-4742f28fbd85?w=1400&auto=format&fit=crop"
+  ],
+  heroTag: "Ristorante · Pizzeria · Specchiolla (BR)",
+  heroTitle: 'Lido <em>Tiziana</em>',
+  heroSub: "Pizza al forno, pesce fresco e tavoli a due passi dal mare, nel cuore di Specchiolla.",
+  featured: [
+    { name: "Margherita", cat: "Classica", desc: "Pomodoro e mozzarella.", price: "€ 10,00", img: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=600&auto=format&fit=crop" },
+    { name: "Diavola", cat: "Classica", desc: "Pomodoro, mozzarella, salame piccante e peperoncino.", price: "€ 12,00", img: "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=600&auto=format&fit=crop" },
+    { name: "Frutti di Mare", cat: "Di mare", desc: "Pomodoro, cozze, gamberetti, polpo e calamari.", price: "€ 18,00", img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&auto=format&fit=crop" }
+  ],
+  menuNote: "Per un servizio più celere, si chiede ai gentili clienti di non apportare modifiche ai condimenti delle pizze. Il nostro impasto è composto da farina di prima qualità, acqua, sale, lievitazione lenta, esperienza e tanto amore. Per ogni ingrediente extra a partire da € 0,50.",
+  menu: [
+    {
+      id: "classiche", label: "Pizze Classiche",
+      items: [
+        { n: "Marinara", d: "Pomodoro, aglio e prezzemolo", p: "€ 8,00" },
+        { n: "Margherita", d: "Pomodoro e mozzarella", p: "€ 10,00" },
+        { n: "Romana", d: "Pomodoro, mozzarella, acciughe e capperi", p: "€ 12,00" },
+        { n: "Prosciutto e Funghi", d: "Pomodoro, mozzarella, prosciutto cotto e funghi", p: "€ 12,00" },
+        { n: "Napoletana", d: "Pomodoro, mozzarella e acciughe", p: "€ 12,00" },
+        { n: "Diavola", d: "Pomodoro, mozzarella, salame piccante e peperoncino", p: "€ 12,00" },
+        { n: "Capricciosa", d: "Pomodoro, mozzarella, funghi, olive, wurstel, salame piccante e prosciutto cotto", p: "€ 15,00" },
+        { n: "Crudaiola", d: "Pomodoro fresco, mozzarella fresca, prosciutto crudo, grana e rucola", p: "€ 16,00" },
+        { n: "Pizza del Nonno", d: "Pomodoro, mozzarella e salsiccia fresca", p: "€ 15,00" },
+        { n: "Nonno Baffuto", d: "Pomodoro, mozzarella, salsiccia fresca, grana e funghi", p: "€ 16,00" },
+        { n: "Tiziana", d: "Pomodoro, mozzarella, pomodorini, prosciutto crudo, rucola e cacio ricotta", p: "€ 16,00" }
+      ]
+    },
+    {
+      id: "speciali", label: "Pizze Speciali",
+      items: [
+        { n: "Frutti di Mare", d: "Pomodoro, cozze, gamberetti, polpo e calamari", p: "€ 18,00" },
+        { n: "Vegetariana", d: "Pomodoro, mozzarella, melanzane, zucchine, peperoni grigliati, funghi e olive", p: "€ 16,00" },
+        { n: "Siciliana", d: "Mozzarella, melanzane grigliate e grana", p: "€ 15,00" },
+        { n: "Italia", d: "Mozzarella di bufala, basilico e pomodorini in cottura", p: "€ 16,00" },
+        { n: "4 Stagioni", d: "Pomodoro, mozzarella, prosciutto cotto, funghi, wurstel e capperi", p: "€ 15,00" },
+        { n: "4 Formaggi", d: "Pomodoro, mozzarella, emmental, fontina, grana e gorgonzola", p: "€ 15,00" },
+        { n: "Fumè", d: "Pomodoro, mozzarella, speck e scamorza affumicata", p: "€ 15,00" },
+        { n: "Tonno e Cipolla", d: "Pomodoro, mozzarella, tonno e cipolla", p: "€ 15,00" },
+        { n: "Viennese", d: "Pomodoro, mozzarella, wurstel e cipolla", p: "€ 13,00" },
+        { n: "Pugliese", d: "Pomodoro, mozzarella, cipolla, olive e pomodoro fresco", p: "€ 15,00" },
+        { n: "Rucola e Grana", d: "Pomodoro, mozzarella, rucola e grana", p: "€ 13,00" }
+      ]
+    },
+    {
+      id: "gourmet", label: "Gourmet & Mare",
+      items: [
+        { n: "Crudo e Panna", d: "Pomodoro, mozzarella, prosciutto crudo e panna", p: "€ 16,00" },
+        { n: "Pizza Snack", d: "Pomodoro, mozzarella, patatine fritte e ketchup", p: "€ 13,00" },
+        { n: "Caprese", d: "Pomodoro fresco, mozzarella fresca e basilico", p: "€ 13,00" },
+        { n: "Pizza del Capitano", d: "Pomodoro, mozzarella, tonno, olive, capperi e peperoni grigliati", p: "€ 16,00" },
+        { n: "Radicchio e Gorgonzola", d: "Mozzarella, radicchio e gorgonzola", p: "€ 15,00" },
+        { n: "Fresca", d: "Mozzarella, zucchine grigliate, gamberi e philadelphia", p: "€ 18,00" },
+        { n: "Eros", d: "Pomodoro, mozzarella, prosciutto cotto, funghi, rucola, pomodoro fresco, crema di aglio, olive e peperoncino", p: "€ 18,00" }
+      ]
+    }
+  ]
+};
+
+/* =====================================================================
+   2) РЕНДЕР — ничего менять не нужно, всё строится из CONFIG выше
+   ===================================================================== */
+function logoHTML(){
+  const n = CONFIG.brand.name;
+  const acc = CONFIG.brand.accent;
+  return n.replace(acc, '<em>'+acc+'</em>');
+}
+function applyBrand(){
+  document.documentElement.style.setProperty('--or', CONFIG.colors.primary);
+  document.documentElement.style.setProperty('--ord', CONFIG.colors.primaryDark);
+  document.documentElement.style.setProperty('--bk', CONFIG.colors.dark);
+  document.getElementById('page-title').textContent = CONFIG.brand.name + ' | Ristorante & Pizzeria';
+  document.getElementById('meta-desc').setAttribute('content', CONFIG.brand.metaDescription);
+  document.getElementById('nav-logo').innerHTML = logoHTML();
+  document.getElementById('footer-logo').innerHTML = logoHTML();
+  document.getElementById('footer-desc').textContent = CONFIG.brand.footerDesc;
+  document.getElementById('footer-copy').textContent = '© ' + new Date().getFullYear() + ' ' + CONFIG.brand.name + ' · ' + CONFIG.contact.addressCity;
+}
+function applyHero(){
+  document.getElementById('hero-tag').innerHTML = '<span></span>' + CONFIG.heroTag;
+  document.getElementById('hero-title').innerHTML = CONFIG.heroTitle;
+  document.getElementById('hero-sub').textContent = CONFIG.heroSub;
+  hSlide(0);
+}
+function applyStats(){
+  const g = document.getElementById('stats-grid');
+  g.innerHTML = `
+    <div class="stat-card"><div class="stat-num">${CONFIG.rating.value}★</div><div class="stat-label">${CONFIG.rating.count}</div></div>
+    <div class="stat-card"><div class="stat-num">${CONFIG.priceRange.split(' ')[0]}</div><div class="stat-label">a persona</div></div>
+    <div class="stat-card"><div class="stat-num">7/7</div><div class="stat-label">aperti tutti i giorni</div></div>
+    <div class="stat-card"><div class="stat-num">Mare</div><div class="stat-label">fronte spiaggia</div></div>
+  `;
+  document.getElementById('about-rating').textContent = CONFIG.rating.value + '★';
+  document.getElementById('about-reviews').textContent = CONFIG.rating.count;
+}
+function applyFeatured(){
+  const g = document.getElementById('featured-grid');
+  g.innerHTML = CONFIG.featured.map(d => `
+    <div class="dish-card">
+      <img src="${d.img}" alt="${d.name}">
+      <div class="dish-body">
+        <span class="dish-cat">${d.cat}</span>
+        <div class="dish-name">${d.name}</div>
+        <div class="dish-desc">${d.desc}</div>
+        <div class="dish-foot"><span class="dish-price">${d.price}</span></div>
+      </div>
+    </div>`).join('');
+}
+function applyMenu(){
+  document.getElementById('menu-note').innerHTML = '<p>' + CONFIG.menuNote + '</p>';
+  const tabs = document.getElementById('menu-tabs');
+  tabs.innerHTML = CONFIG.menu.map((c,i) => `<button class="mtab${i===0?' active':''}" onclick="sTab(this,'${c.id}')">${c.label}</button>`).join('');
+  rMenu(CONFIG.menu[0].id);
+}
+function rMenu(id){
+  const cat = CONFIG.menu.find(c => c.id === id);
+  const c = document.getElementById('menu-c');
+  if(!cat || !c) return;
+  c.innerHTML = '<div class="mi-grid">' + cat.items.map(i => `<div class="mi"><div><h4>${i.n}</h4><p>${i.d}</p></div><div class="mi-price">${i.p}</div></div>`).join('') + '</div>';
+}
+function sTab(el, id){
+  document.querySelectorAll('.mtab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  rMenu(id);
+}
+function dayIndexIt(){
+  // JS: 0=domenica..6=sabato -> allineo con array CONFIG.hours (0=Lunedì..6=Domenica)
+  const d = new Date().getDay();
+  return d === 0 ? 6 : d - 1;
+}
+function applyHoursAndContact(){
+  const todayIdx = dayIndexIt();
+  document.getElementById('hours-card').innerHTML =
+    '<h4 style="font-size:15px;margin-bottom:12px">Orari di apertura</h4><div class="hours-table">' +
+    CONFIG.hours.map((h,i) => `<div class="hr-row${i===todayIdx?' today':''}"><span class="hr-day">${h.day}</span><span class="hr-time">${h.time}</span></div>`).join('') +
+    '</div>';
+  document.getElementById('addr-card').innerHTML =
+    `<p><strong>Indirizzo:</strong> ${CONFIG.contact.addressLine}, ${CONFIG.contact.addressCity}</p>
+     <p><strong>Tel:</strong> ${CONFIG.contact.phoneDisplay}</p>
+     <p><strong>Email:</strong> ${CONFIG.contact.email}</p>
+     <p><strong>Prezzo medio:</strong> ${CONFIG.priceRange}</p>`;
+  document.getElementById('usp-hours').textContent = 'Aperti ogni giorno, ' + CONFIG.hours[0].time.replace('–','–') + '.';
+
+  document.getElementById('footer-phone').textContent = CONFIG.contact.phoneDisplay;
+  document.getElementById('footer-phone').href = 'tel:' + CONFIG.contact.phoneHref;
+  document.getElementById('footer-email').textContent = CONFIG.contact.email;
+  document.getElementById('footer-email').href = 'mailto:' + CONFIG.contact.email;
+  document.getElementById('footer-address').textContent = CONFIG.contact.addressLine + ', ' + CONFIG.contact.addressCity;
+  document.getElementById('footer-address').href = CONFIG.contact.mapsUrl;
+
+  const map = document.getElementById('map-card');
+  map.onclick = () => window.open(CONFIG.contact.mapsUrl, '_blank');
+
+  const wa = document.getElementById('wa-btn');
+  wa.onclick = () => {
+    const msg = encodeURIComponent('Ciao! Vorrei prenotare un tavolo da ' + CONFIG.brand.name + '.');
+    window.open('https://wa.me/' + CONFIG.contact.whatsappNumber + '?text=' + msg, '_blank');
+  };
+
+  const socLinks = [
+    { title: 'Google Maps', url: CONFIG.contact.mapsUrl, svg: '<circle cx="12" cy="8" r="2"/><path d="M12 2C8.686 2 6 4.686 6 8c0 5.25 6 13 6 13s6-7.75 6-13c0-3.314-2.686-6-6-6z"/>' },
+    { title: 'WhatsApp', url: 'https://wa.me/' + CONFIG.contact.whatsappNumber, svg: '<path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.559 4.117 1.533 5.842L.062 23.5l5.799-1.521A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/>' }
+  ];
+  document.getElementById('footer-soc').innerHTML = socLinks.map(s => `<a class="soc" href="${s.url}" target="_blank" title="${s.title}"><svg viewBox="0 0 24 24">${s.svg}</svg></a>`).join('');
+}
+function submitBooking(){
+  const name = document.getElementById('bk-name').value.trim();
+  if(!name){ showToast('Inserisci il tuo nome per continuare'); return; }
+  showToast('Richiesta inviata! Ti contatteremo per confermare ');
+}
+
+/* =====================================================================
+   3) UI generico (toast, menu mobile, hero slider, cambio pagina)
+   ===================================================================== */
+function showToast(msg){
+  const t=document.getElementById('toast');
+  const m=document.getElementById('toast-msg');
+  if(!t||!m)return;
+  m.textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3200);
+}
+function toggleMenu(){
+  const m=document.getElementById('mobileMenu');
+  const h=document.getElementById('hamburger');
+  if(!m||!h)return;
+  m.classList.toggle('open');
+  h.classList.toggle('open');
+}
+let hi=0;
+function hSlide(d){
+  hi=(hi+d+CONFIG.heroSlides.length)%CONFIG.heroSlides.length;
+  const b=document.getElementById('hero-bg');
+  if(b)b.style.backgroundImage=`url('${CONFIG.heroSlides[hi]}')`;
+  const p=document.getElementById('hp');
+  if(p)p.style.width=((hi+1)/CONFIG.heroSlides.length*100)+'%';
+}
+function goPage(n){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const el=document.getElementById('sec-'+n);
+  if(el)el.classList.add('active');
+  document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* INIT */
+applyBrand();
+applyHero();
+applyStats();
+applyFeatured();
+applyMenu();
+applyHoursAndContact();
+setInterval(()=>hSlide(1), 6000);
+</script>
+</body>
+</html>
